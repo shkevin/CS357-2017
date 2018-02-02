@@ -31,4 +31,18 @@ setUnion [] list = list
 setUnion (x:xs) list = if elem x list
                        then x:setUnion xs (removeElement x list)
                        else x:setUnion xs list
-                       
+
+setIntersection :: [Integer] -> [Integer] -> [Integer]
+setIntersection [] _ = []
+setIntersection (x:xs) list = if elem x list
+                                then x:setIntersection xs (removeElement x list)
+                                else setIntersection xs list
+
+setDifference :: [Integer] -> [Integer] -> [Integer]
+setDifference [] _ = []
+
+setEqual :: [Integer] -> [Integer] -> Bool
+setEqual [] _ = 
+setEqual (x:xs) (x:ys) = if x == y
+                         then true && setEqual xs ys
+                         else false
