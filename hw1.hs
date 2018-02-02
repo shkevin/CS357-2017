@@ -31,3 +31,4 @@ setUnion [] list = list
 setUnion (x:xs) list = if elem x list
                        then x:setUnion xs (removeElement x list)
                        else x:setUnion xs list
+                       
