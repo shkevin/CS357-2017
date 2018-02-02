@@ -1,8 +1,5 @@
 #!/usr/bin/env stack
 
-main :: IO ()
-main = putStrLn "Hello World"
-
 test :: Int -> Int -> Bool
 test a b = ((a `mod` 2) == 1) && ((b `mod` 2) == 1)
 
@@ -38,11 +35,16 @@ setIntersection (x:xs) list = if elem x list
                                 then x:setIntersection xs (removeElement x list)
                                 else setIntersection xs list
 
-setDifference :: [Integer] -> [Integer] -> [Integer]
-setDifference [] _ = []
+-- setDifference :: [Integer] -> [Integer] -> [Integer]
+-- setDifference [] _ = []
 
 setEqual :: [Integer] -> [Integer] -> Bool
-setEqual [] _ = 
-setEqual (x:xs) (x:ys) = if x == y
-                         then true && setEqual xs ys
-                         else false
+setEqual [] [] = True
+setEqual [] ys = False
+setEqual xs [] = False
+setEqual (x:xs) (y:ys) = if x == y
+                         then True && setEqual xs ys
+                         else False
+
+ dr :: Integer -> Int
+ 
