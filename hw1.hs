@@ -9,7 +9,7 @@ stutter (x:xs) = [x] ++ [x] ++ (stutter xs)
 
 compress :: [Char] -> [Char]
 compress [] = []
-compress (x:xs) = if [x] == take 1 xs
+compress (x:xs) = if [x] == take 1 xs 
                   then compress xs
                   else x:compress xs
 
@@ -49,10 +49,11 @@ setEqual (x:xs) (y:ys) = if x == y
                          then True && setEqual xs ys
                          else False
 
--- This is take from https://stackoverflow.com/questions/3963269/split-a-number-into-its-digits-with-haskell
-digs :: Integral x => x -> [x]
-digs 0 = []
-digs x = digs (x `div` 10) ++ [x `mod` 10]
+-- This is taken from:
+-- https://stackoverflow.com/questions/3963269/split-a-number-into-its-digits-with-haskell
+intToList :: Integral x => x -> [x]
+intToList 0 = []
+intToList x = intToList (x `div` 10) ++ [x `mod` 10]
 
 dr :: Integer -> Int
-dr x = fromInteger $ (sum $ (digs $ (sum $ digs x)))
+dr x = fromInteger $ (sum $ (intToList $ (sum $ intToList x)))
