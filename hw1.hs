@@ -35,8 +35,11 @@ setIntersection (x:xs) list = if elem x list
                                 then x:setIntersection xs (removeElement x list)
                                 else setIntersection xs list
 
--- setDifference :: [Integer] -> [Integer] -> [Integer]
--- setDifference [] _ = []
+setDifference :: [Integer] -> [Integer] -> [Integer]
+setDifference [] _ = []
+setDifference (x:xs) list = if elem x list
+                            then setDifference xs list
+                            else x:setDifference xs list
 
 setEqual :: [Integer] -> [Integer] -> Bool
 setEqual [] [] = True
@@ -46,5 +49,10 @@ setEqual (x:xs) (y:ys) = if x == y
                          then True && setEqual xs ys
                          else False
 
- dr :: Integer -> Int
- 
+-- This is take from https://stackoverflow.com/questions/3963269/split-a-number-into-its-digits-with-haskell
+digs :: Integral x => x -> [x]
+digs 0 = []
+digs x = digs (x `div` 10) ++ [x `mod` 10]
+
+dr :: Integer -> Int
+dr x = fromInteger $ (sum $ (digs $ (sum $ digs x)))
