@@ -1,8 +1,5 @@
 #!/usr/bin/env stack
 
-main :: IO ()
-main = putStrLn "Hello World"
-
 test :: Int -> Int -> Bool
 test a b = ((a `mod` 2) == 1) && ((b `mod` 2) == 1)
 
@@ -12,7 +9,7 @@ stutter (x:xs) = [x] ++ [x] ++ (stutter xs)
 
 compress :: [Char] -> [Char]
 compress [] = []
-compress (x:xs) = if [x] == take 1 xs
+compress (x:xs) = if [x] == take 1 xs 
                   then compress xs
                   else x:compress xs
 
@@ -40,9 +37,23 @@ setIntersection (x:xs) list = if elem x list
 
 setDifference :: [Integer] -> [Integer] -> [Integer]
 setDifference [] _ = []
+setDifference (x:xs) list = if elem x list
+                            then setDifference xs list
+                            else x:setDifference xs list
 
 setEqual :: [Integer] -> [Integer] -> Bool
-setEqual [] _ = 
-setEqual (x:xs) (x:ys) = if x == y
-                         then true && setEqual xs ys
-                         else false
+setEqual [] [] = True
+setEqual [] ys = False
+setEqual xs [] = False
+setEqual (x:xs) (y:ys) = if x == y
+                         then True && setEqual xs ys
+                         else False
+
+-- This is taken from:
+-- https://stackoverflow.com/questions/3963269/split-a-number-into-its-digits-with-haskell
+intToList :: Integral x => x -> [x]
+intToList 0 = []
+intToList x = intToList (x `div` 10) ++ [x `mod` 10]
+
+dr :: Integer -> Int
+dr x = fromInteger $ (sum $ (intToList $ (sum $ intToList x)))
