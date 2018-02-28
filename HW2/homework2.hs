@@ -1,24 +1,22 @@
 {-
-YourName
-YourNetId
+Name: Kevin Cox
+NetID: Shkevin
 -}
+
+#!/usr/bin/env stack
 
 --No other imports are allowed
 import Data.List
 
 --2.1
 collatz :: [Int] -> Int
-collatz [] = []
-collatz (x:xs)
-             | length largest < length $indCollatz $take 1 xs = 
-             | length largest > length $indCollatz $take 1 xs = 
-             | otherwise = 
+collatz xs = xs !! (last (getIndexOfVal (maximum $ map (length . indCollatz) xs) 0 (map (length. indCollatz) xs)))
 
 indCollatz :: Int -> [Int]
 indCollatz 1 = [1]
 indCollatz x
-           | (isEven x) == True = [x] ++ (indCollatz (x `div` 2))
-           | otherwise = [x] ++ (indCollatz ((3*x) + 1))
+           | (isEven x) == True = x:(indCollatz (x `div` 2))
+           | otherwise = x:(indCollatz ((3*x) + 1))
 
 
 --2.2
@@ -65,3 +63,12 @@ mulLongInts = undefined
 --User defined functions
 isEven :: Int -> Bool
 isEven x = ((x `mod` 2) == 0)
+
+increment :: Int -> Int
+increment x = x + 1
+
+getIndexOfVal :: Int -> Int -> [Int] -> [Int]
+getIndexOfVal _ _ [] = []
+getIndexOfVal val count xs
+                    | (take 1 xs) == [val] = [count] ++ getIndexOfVal val (increment count) (tail xs)
+                    | otherwise = getIndexOfVal val (increment count) (tail xs)

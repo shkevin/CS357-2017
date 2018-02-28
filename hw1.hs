@@ -57,3 +57,7 @@ intToList x = intToList (x `div` 10) ++ [x `mod` 10]
 
 dr :: Integer -> Int
 dr x = fromInteger $ (sum $ (intToList $ (sum $ intToList x)))
+
+stringsEq :: [Char] -> [Char] -> Bool
+stringsEq [] [] = True
+stringsEq (x:xs) (y:ys) = x == y && stringsEq xs ys 
