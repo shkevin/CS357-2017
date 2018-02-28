@@ -18,10 +18,7 @@ haskellFileNames strings = filter (endsWith) strings
 
 --2.3
 select :: (t -> Bool) -> [t] -> [a] -> [a]
-select _ [] _ = []
-select _ _ [] = []
-select p xs ys = if any (True==) map (p) xs
-                 then (ys !! (head elemIndices True $ map (p) xs)) ++ select p (delete from xs) (delete from ys)
+select p xs ys = [ys !! ind | ind <- elemIndices True $ map (p) xs]
 
 --2.4
 prefixSum :: [Int] -> [Int]
