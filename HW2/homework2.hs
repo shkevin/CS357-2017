@@ -12,20 +12,16 @@ import Data.List
 collatz :: [Int] -> Int
 collatz xs = xs !! (last (getIndexOfVal (maximum $ map (length . indCollatz) xs) 0 (map (length. indCollatz) xs)))
 
-indCollatz :: Int -> [Int]
-indCollatz 1 = [1]
-indCollatz x
-           | (isEven x) == True = x:(indCollatz (x `div` 2))
-           | otherwise = x:(indCollatz ((3*x) + 1))
-
-
 --2.2
 haskellFileNames :: [String] -> [String]
-haskellFileNames = undefined
+haskellFileNames strings = filter (endsWith) strings
 
 --2.3
 select :: (t -> Bool) -> [t] -> [a] -> [a]
-select = undefined
+select _ [] _ = []
+select _ _ [] = []
+select p xs ys = if any (True==) map (p) xs
+                 then (ys !! (head elemIndices True $ map (p) xs)) ++ select p (delete from xs) (delete from ys)
 
 --2.4
 prefixSum :: [Int] -> [Int]
@@ -61,6 +57,12 @@ mulLongInts :: Numeral -> Numeral -> Numeral
 mulLongInts = undefined
 
 --User defined functions
+indCollatz :: Int -> [Int]
+indCollatz 1 = [1]
+indCollatz x
+           | (isEven x) == True = x:(indCollatz (x `div` 2))
+           | otherwise = x:(indCollatz ((3*x) + 1))
+
 isEven :: Int -> Bool
 isEven x = ((x `mod` 2) == 0)
 
@@ -72,3 +74,7 @@ getIndexOfVal _ _ [] = []
 getIndexOfVal val count xs
                     | (take 1 xs) == [val] = [count] ++ getIndexOfVal val (increment count) (tail xs)
                     | otherwise = getIndexOfVal val (increment count) (tail xs)
+
+endsWith :: String -> Bool
+endsWith [] = False
+endsWith str = ".hs" `isSuffixOf` str || ".lhs" `isSuffixOf` str
