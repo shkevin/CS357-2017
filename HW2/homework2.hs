@@ -27,7 +27,7 @@ prefixSum xs = (prefixSum (take (length xs + (-1)) xs)) ++ [(sum xs)]
 
 --2.5
 numbers :: [Int] -> Int
-numbers xs = sum $ zipWith (*) xs (reverse $ take (length xs) (iterate(10*)1))
+numbers xs = read $ concatMap (show) xs :: Int
 
 --2.6
 type Numeral = (Int, [Int])
@@ -36,15 +36,19 @@ example = (10, [1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0])
 
 --2.6 1
 -- makeLongInt :: Integer -> Int -> Numeral
--- makeLongInt n r = (r, [x | x <- (fromInteger n)])
+-- makeLongInt n r
+--                | numLength n 1 == 1 = 
+--                | otherwise = head (decomposeNum n) * (r ^ (numLength n 0)) + makeLongInt (n `mod` (last (take (numLength n 1) (iterate (10*)1)))) r
 
 --2.6 2
-evaluateLongInt :: Numeral -> Integer
-evaluateLongInt = undefined
+-- evaluateLongInt :: Numeral -> Integer
+-- evaluateLongInt (_, []) = 0
+-- evaluateLongInt (r, l) = toInteger (head l) * (toInteger $ r ^ (length l + (-1))) + evaluateLongInt (r, drop 1 l)
+--
 
---2.6 3
+-- --2.6 3
 changeRadixLongInt :: Numeral -> Int -> Numeral 
-changeRadixLongInt = undefined
+changeRadixLongInt (_, l) nr = (nr, changeBase (numbers l) nr)
 
 --2.6 4
 addLongInts :: Numeral -> Numeral -> Numeral
@@ -83,13 +87,28 @@ endsWith str = substring ".hs" str || substring ".lhs" str
 substring :: String -> String -> Bool
 substring _ [] = False
 substring str strToCheck
-                       | str `isSuffixOf` strToCheck = True
+                       | str `isSuffixOf` strToCheck && length str >= 4 = True 
                        | head strToCheck == ' ' = substring str (tail strToCheck)
                        | (head . reverse) strToCheck == ' ' = substring str (take (length strToCheck + (-1)) strToCheck)
                        | otherwise = False
 
--- decomposeNum :: Integer -> [Int]
--- decomposeNum 0 = 0
--- decomposeNum num = 
+decomposeNum :: Integer -> [Int]
+decomposeNum num = map (\x -> read [x]) $ show num
 
--- length of  num = (length $ intersperse ',' "123") + (-2)
+--Iteration needs to be 1 to have correct output
+numLength :: Integer -> Int -> Int
+numLength 0 _ = 0
+numLength num iteration
+                      | num `div` 10 == 0 = iteration
+                      | otherwise = numLength (num `div` 10) (increment iteration)
+
+-- test :: [Int] -> Int
+test n r = map (\(x, y) -> x * (r^y)) (zip (decomposeNum n) (generateDecList (numLength n 1 + (-1))))
+
+changeBase :: Int -> Int -> [Int]
+changeBase 0 _ = []
+changeBase n r = changeBase (n `div` r) r ++ [n `mod` r]
+
+generateDecList :: Int -> [Int]
+generateDecList 0 = [0]
+generateDecList x = [x] ++ generateDecList (x +(-1))
