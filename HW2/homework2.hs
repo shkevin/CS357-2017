@@ -34,24 +34,24 @@ numbers :: [Int] -> Int
 numbers xs = read $ concatMap (show) xs :: Int
 ---------------------------------------------------------------------------------
 
---2.6
+-------------------------------------2.6-----------------------------------------
 type Numeral = (Int, [Int])
 
 example = (10, [1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0])
 
---2.6 1
+------------------------------------2.6 1----------------------------------------
 makeLongInt :: Integer -> Int -> Numeral
 makeLongInt n r = (r, changeBase (fromIntegral n) (toInteger r))
 ---------------------------------------------------------------------------------      
 
 ------------------------------------2.6 2----------------------------------------
 evaluateLongInt :: Numeral -> Integer
-evaluateLongInt = undefined
+evaluateLongInt (r, l) = toInteger $ sum $ map (\(x, y) -> (toInteger x * ((toInteger r) ^ y))) (zip l (generateDecList $ length l + (-1)))
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 3----------------------------------------
-changeRadixLongInt :: Numeral -> Int -> Numeral 
-changeRadixLongInt = undefined
+-- changeRadixLongInt :: Numeral -> Int -> Numeral
+-- changeRadixLongInt (n, l) b = (b, changeBase )
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 4----------------------------------------
@@ -107,12 +107,15 @@ numLength num iteration
                       | otherwise = numLength (num `div` 10) (increment iteration)
 
 -- test :: [Int] -> Int -> Integer
-test n r = map (\(x, y) -> x * (r^y)) (zip (decomposeNum n) (generateDecList ((fromIntegral $ numLength n 0))))
+test n r = map (\(x, y) -> (fromIntegral) x * (r^y)) (zip (decomposeNum n) (generateDecList ((numLength n 0))))
 
 changeBase :: Integer -> Integer -> [Int]
 changeBase 0 _ = []
 changeBase n r = changeBase (n `div` r) r ++ [fromInteger $ n `mod` r]
 
-generateDecList :: Integer -> [Int]
+-- changeBase' :: [Int] -> Int -> [Int]
+-- changeBase' l r = changeBase' ((head l) `div` r) r ++ [ `mod` r]
+
+generateDecList :: Int -> [Int]
 generateDecList 0 = [0]
 generateDecList x = [fromIntegral x] ++ generateDecList (fromIntegral x +(-1))
