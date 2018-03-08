@@ -80,7 +80,8 @@ changeRadixLongInt (or, l) nr = undefined
 
 ------------------------------------2.6 4----------------------------------------
 addLongInts :: Numeral -> Numeral -> Numeral
-addLongInts (r1, l1) (r2, l2) = undefined 
+addLongInts (r1, l1) (r2, l2)
+                            | r1 == r2 = (r1, zipWith (+) l1 (padFront (abs $ length l1 - length l2) l2))
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 5----------------------------------------
@@ -153,10 +154,14 @@ intToList :: Integral x => x -> [x]
 intToList 0 = []
 intToList x = intToList (x `div` 10) ++ [x `mod` 10]
 
-
--- changeBase' :: [Int] -> Int -> [Int]
--- changeBase' l r = changeBase' ((head l) `div` r) r ++ [ `mod` r]
-
 generateDecList :: Int -> [Int]
 generateDecList 0 = [0]
 generateDecList x = [fromIntegral x] ++ generateDecList (fromIntegral x +(-1))
+
+padFront :: Int -> [Int] -> [Int]
+padFront len xs = (take len (repeat 0)) ++ xs
+
+getLargerList :: [Int] -> [Int] -> [Int]
+getLargerList xs ys
+                  | xs => ys = xs
+                  | otherwise = ys
