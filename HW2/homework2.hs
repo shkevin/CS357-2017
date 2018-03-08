@@ -75,12 +75,12 @@ evaluateLongInt (r, l) = toInteger $ sum $ map (\(x, y) -> (toInteger x * ((toIn
 
 ------------------------------------2.6 3----------------------------------------
 changeRadixLongInt :: Numeral -> Int -> Numeral
-changeRadixLongInt (n, l) b = undefined
+changeRadixLongInt (or, l) nr = undefined
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 4----------------------------------------
 addLongInts :: Numeral -> Numeral -> Numeral
-addLongInts = undefined
+addLongInts (r1, l1) (r2, l2) = undefined 
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 5----------------------------------------
@@ -137,9 +137,22 @@ changeBase :: Integer -> Integer -> [Int]
 changeBase 0 _ = []
 changeBase n r = changeBase (n `div` r) r ++ [fromInteger $ n `mod` r]
 
-cb :: [Int] -> Int -> Int
-cb [] _ = 1
-cb (x:xm:xs) r = ((x * r) + xm) * cb xs r
+cb :: Int -> Int -> [Int]
+cb 0 _ = []
+cb n r = cb (n `div` r) r ++ [(n `mod` r)]
+
+cbFromTo :: [Int] -> Int -> Int
+cbFromTo [x] _ = x
+cbFromTo (x:xm:xs) r = cbFromTo (((x * r) + xm):xs) r
+
+fromListToInt :: [Int] -> Int
+fromListToInt [] = 0
+fromListToInt (x:xs) = (x * (10 ^ length xs)) + fromListToInt xs
+
+intToList :: Integral x => x -> [x]
+intToList 0 = []
+intToList x = intToList (x `div` 10) ++ [x `mod` 10]
+
 
 -- changeBase' :: [Int] -> Int -> [Int]
 -- changeBase' l r = changeBase' ((head l) `div` r) r ++ [ `mod` r]
