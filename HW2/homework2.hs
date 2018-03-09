@@ -81,7 +81,9 @@ changeRadixLongInt (or, l) nr = undefined
 ------------------------------------2.6 4----------------------------------------
 addLongInts :: Numeral -> Numeral -> Numeral
 addLongInts (r1, l1) (r2, l2)
-                            | r1 == r2 = (r1, zipWith (+) l1 (padFront (abs $ length l1 - length l2) l2))
+                            | r1 == r2 = (r1, zipWith (+) (getLargerList l1 l2) (padFront (abs $ length l1 - length l2) (getSmallerList l1 l2)))
+                            | r1 < r2 = undefined
+                            | otherwise = undefined
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 5----------------------------------------
@@ -138,19 +140,25 @@ changeBase :: Integer -> Integer -> [Int]
 changeBase 0 _ = []
 changeBase n r = changeBase (n `div` r) r ++ [fromInteger $ n `mod` r]
 
+
 cb :: Int -> Int -> [Int]
 cb 0 _ = []
 cb n r = cb (n `div` r) r ++ [(n `mod` r)]
 
-cbFromTo :: [Int] -> Int -> Int
-cbFromTo [x] _ = x
-cbFromTo (x:xm:xs) r = cbFromTo (((x * r) + xm):xs) r
+cbFromTo :: [Int] -> Int -> Int -> Int
+cbFromTo [x] _ _ = x
+cbFromTo (x:xm:xs) or nr = cbFromTo (result : xs) or nr
+                           where result = cbFromTo [x * or + xm] or nr
+
+--Converts to base 10 from given radix r
+convertToTen :: Int -> Int -> Int
+convertToTen n r = sum $ map (\(x,y) -> x * (r ^ y)) (zip (intToList n) (generateDecList $ ((length $ intToList n)) + (-1)))
 
 fromListToInt :: [Int] -> Int
 fromListToInt [] = 0
 fromListToInt (x:xs) = (x * (10 ^ length xs)) + fromListToInt xs
 
-intToList :: Integral x => x -> [x]
+intToList :: Int -> [Int]
 intToList 0 = []
 intToList x = intToList (x `div` 10) ++ [x `mod` 10]
 
@@ -163,5 +171,10 @@ padFront len xs = (take len (repeat 0)) ++ xs
 
 getLargerList :: [Int] -> [Int] -> [Int]
 getLargerList xs ys
-                  | xs => ys = xs
+                  | xs >= ys = xs
                   | otherwise = ys
+
+getSmallerList :: [Int] -> [Int] -> [Int]
+getSmallerList xs ys
+                    | xs <= ys = xs
+                    | otherwise = ys
