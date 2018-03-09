@@ -79,11 +79,8 @@ changeRadixLongInt (or, l) nr = undefined
 ---------------------------------------------------------------------------------
 
 -- ------------------------------------2.6 4----------------------------------------
--- addLongInts :: Numeral -> Numeral -> Numeral
--- addLongInts (r1, l1) (r2, l2)
---                             | r1 == r2 = (r1, addBaseTenLists (convertToTen l1) (convertToTen l2))
---                             | r1 < r2 = undefined
---                             | otherwise = undefined
+addLongInts :: Numeral -> Numeral -> Numeral
+addLongInts (r1, l1) (r2, l2) = (maximum [r1, r2], map fromListToInt $ map (`cb` (maximum [r1, r2])) (applyCarries (addBaseTenLists (map (`convertToTen` r1) l1) (map (`convertToTen` r2) l2)) (maximum [r1, r2])))
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 5----------------------------------------
@@ -154,19 +151,22 @@ cbFromTo (x:xm:xs) or nr = cbFromTo (result : xs) or nr
 convertToTen :: Int -> Int -> Int
 convertToTen n r = sum $ map (\(x,y) -> x * (r ^ y)) (zip (intToList n) (generateDecList $ ((length $ intToList n)) + (-1)))
 
+-- convertToTen :: [Int] -> Int -> [Int]
+-- convertToTen ns r = map (\(x,y) -> x * (r ^ y)) (zip ns (generateDecList $ (length ns + (-1))))
+
+
 fromListToInt :: [Int] -> Int
 fromListToInt [] = 0
 fromListToInt (x:xs) = (x * (10 ^ length xs)) + fromListToInt xs
 
 addBaseTenLists :: [Int] -> [Int] -> [Int]
-addBaseTenLists xs ys
-                      | length xs /= length ys = zipWith (+) (getLargerList xs ys) (padFront (abs $ length xs - length ys) (getSmallerList xs ys))
+addBaseTenLists xs ys = zipWith (+) (getLargerList xs ys) (padFront (abs $ length xs - length ys) (getSmallerList xs ys))
 
 applyCarries :: [Int] -> Int -> [Int]
 applyCarries xs r = reverse (applyCarriesHelper (reverse xs) r 0)
 
 applyCarriesHelper :: [Int] -> Int -> Int -> [Int]
-applyCarriesHelper [] _ _ = []
+applyCarriesHelper [] _ carry = []
 applyCarriesHelper (x:xs) r carry = [((x + carry) `mod` r)] ++ applyCarriesHelper xs r (x `div` r)
 
 intToList :: Int -> [Int]
