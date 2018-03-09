@@ -15,7 +15,7 @@ module Homework2
       makeLongInt, 
       evaluateLongInt, 
       changeRadixLongInt, 
-      addLongInts, 
+      -- addLongInts, 
       mulLongInts
     ) where
 
@@ -78,18 +78,21 @@ changeRadixLongInt :: Numeral -> Int -> Numeral
 changeRadixLongInt (or, l) nr = undefined
 ---------------------------------------------------------------------------------
 
-------------------------------------2.6 4----------------------------------------
-addLongInts :: Numeral -> Numeral -> Numeral
-addLongInts (r1, l1) (r2, l2)
-                            | r1 == r2 = (r1, zipWith (+) (getLargerList l1 l2) (padFront (abs $ length l1 - length l2) (getSmallerList l1 l2)))
-                            | r1 < r2 = undefined
-                            | otherwise = undefined
+-- ------------------------------------2.6 4----------------------------------------
+-- addLongInts :: Numeral -> Numeral -> Numeral
+-- addLongInts (r1, l1) (r2, l2)
+--                             | r1 == r2 = (r1, addBaseTenLists (convertToTen l1) (convertToTen l2))
+--                             | r1 < r2 = undefined
+--                             | otherwise = undefined
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 5----------------------------------------
 mulLongInts :: Numeral -> Numeral -> Numeral
 mulLongInts = undefined
 ---------------------------------------------------------------------------------
+
+
+
 
 
 ----------------------------User defined functions-------------------------------
@@ -133,9 +136,6 @@ numLength num iteration
                       | num `div` 10 == 0 = iteration
                       | otherwise = numLength (num `div` 10) (increment iteration)
 
--- test :: [Int] -> Int -> Integer
-test n r = map (\(x, y) -> (fromIntegral) x * (r^y)) (zip (decomposeNum n) (generateDecList ((numLength n 0))))
-
 changeBase :: Integer -> Integer -> [Int]
 changeBase 0 _ = []
 changeBase n r = changeBase (n `div` r) r ++ [fromInteger $ n `mod` r]
@@ -158,6 +158,17 @@ fromListToInt :: [Int] -> Int
 fromListToInt [] = 0
 fromListToInt (x:xs) = (x * (10 ^ length xs)) + fromListToInt xs
 
+addBaseTenLists :: [Int] -> [Int] -> [Int]
+addBaseTenLists xs ys
+                      | length xs /= length ys = zipWith (+) (getLargerList xs ys) (padFront (abs $ length xs - length ys) (getSmallerList xs ys))
+
+applyCarries :: [Int] -> Int -> [Int]
+applyCarries xs r = reverse (applyCarriesHelper (reverse xs) r 0)
+
+applyCarriesHelper :: [Int] -> Int -> Int -> [Int]
+applyCarriesHelper [] _ _ = []
+applyCarriesHelper (x:xs) r carry = [((x + carry) `mod` r)] ++ applyCarriesHelper xs r (x `div` r)
+
 intToList :: Int -> [Int]
 intToList 0 = []
 intToList x = intToList (x `div` 10) ++ [x `mod` 10]
@@ -171,10 +182,10 @@ padFront len xs = (take len (repeat 0)) ++ xs
 
 getLargerList :: [Int] -> [Int] -> [Int]
 getLargerList xs ys
-                  | xs >= ys = xs
+                  | length xs >= length ys = xs
                   | otherwise = ys
 
 getSmallerList :: [Int] -> [Int] -> [Int]
 getSmallerList xs ys
-                    | xs <= ys = xs
+                    | length xs <= length ys = xs
                     | otherwise = ys
