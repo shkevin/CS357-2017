@@ -1,31 +1,3 @@
-{-
-
-File for testing solutions to Homework 2. 
-
-Install the random package. 
-
-    >> stack update
-    >> stack install random
-
-If you aren't using Stack, then replace `stack` with `cabal`. 
-
-Add the following to the top of your homework2.hs file:
-
-    module Homework2
-    ( collatz, 
-      haskellFileNames, 
-      select, 
-      prefixSum, 
-      numbers, 
-      Numeral, 
-      makeLongInt, 
-      evaluateLongInt, 
-      changeRadixLongInt, 
-      addLongInts, 
-      mulLongInts
-    ) where
-
--}
 
 import Data.List
 import System.Random
@@ -107,13 +79,16 @@ testNumeral = and [
 testMakeLongInt = and [
     makeLongInt 123 10 == (10, [1,2,3]), 
     makeLongInt 12345678901234567890 10 == example,
+    makeLongInt 672 16 == (16, [2,10,0]),
     and [(makeLongInt ((toInteger r)^(toInteger p)) r) == (r, 1 : replicate p 0) | r<-[2..100], p<-[0..10]]
   ]
 
 -- 2.6 2
 testEvaluateLongInt = and [
     evaluateLongInt (10, [1,2,3]) == 123, 
-    evaluateLongInt example == 12345678901234567890
+    evaluateLongInt example == 12345678901234567890,
+    evaluateLongInt (10, [1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9]) == 1234567890123456789,
+    evaluateLongInt (10, ([1..9] ++ (0:[9,8..1]))) == 1234567890987654321
   ]
 
 -- 2.6 3
@@ -121,9 +96,10 @@ changeRadixLongIntSpec :: Numeral -> Int -> Numeral
 changeRadixLongIntSpec n r = makeLongInt (evaluateLongInt n) r
 
 testChangeRadixLongInt = and [
-    changeRadixLongInt (10, [1,2,3]) 8 == (8, [1,7,3]), 
+    changeRadixLongInt (10, [1,2,3]) 8 == (8, [1,7,3]),
     changeRadixLongInt (10, [1,2,3]) 16 == (16, [7,11]),
-    changeRadixLongInt (16, [13,14,10,13,11,14,14,15]) 17 == (17, [9,1,13,3,6,16,7,8])
+    changeRadixLongInt (16, [13,14,10,13,11,14,14,15]) 17 == (17, [9,1,13,3,6,16,7,8]),
+    changeRadixLongInt (192837465, [1..100]) 1234567890 == changeRadixLongIntSpec (192837465, [1..100]) 1234567890
   ]
 
 -- 2.6 4
@@ -151,9 +127,7 @@ testMulLongInts = and [
   ]
 
 {- 
-
 The following code was written by Peter Blemel. 
-
 -}
 
 -- Used manually to get a random seed to pass into the test function.  I couldn't
@@ -218,4 +192,3 @@ testRandomNumerals = foldl (\x ((r1, n1),(r2, n2)) -> (x &&
                                   in
                                       (testAdd n1 l1 n2 l2) && (testMult n1 l1 n2 l2)
                              )) True testData
-
