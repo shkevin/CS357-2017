@@ -76,7 +76,7 @@ evaluateLongInt (r, l) = toInteger $ sum $ map (\(x, y) -> (toInteger x * ((toIn
 ------------------------------------2.6 3----------------------------------------
 changeRadixLongInt :: Numeral -> Int -> Numeral
 changeRadixLongInt (or, l) nr = if or == 10
-                                then removeZeroPadding $ fromBaseTenTo l nr [0]
+                                then removeZeroPadding (fromBaseTenTo l nr [0])
                                 else changeRadixLongInt (toBaseTen l or [0]) nr
 ---------------------------------------------------------------------------------
 
