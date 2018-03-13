@@ -75,13 +75,9 @@ evaluateLongInt (r, l) = toInteger $ sum $ map (\(x, y) -> (toInteger x * ((toIn
 
 ------------------------------------2.6 3----------------------------------------
 changeRadixLongInt :: Numeral -> Int -> Numeral
-changeRadixLongInt (or, l) nr
-                             | nr == or = (or, l)
-                             | otherwise = (nr, radixChange (minimum [or, nr]) (maximum [or, nr]) l)
-
-radixChange :: Int -> Int -> [Int] -> [Int]
-radixChange _ _ [] = []
-radixChange or nr (x:y:xs) = [(x * or) + (y)]
+changeRadixLongInt (or, l) nr = if or == 10
+                                then removeZeroPadding $ fromBaseTenTo l nr [0]
+                                else changeRadixLongInt (toBaseTen l or [0]) nr
 ---------------------------------------------------------------------------------
 
 -- ------------------------------------2.6 4----------------------------------------
@@ -102,44 +98,11 @@ applyCarriesHelperAdd (x:xs) r carry = [num `mod` r] ++ applyCarriesHelperAdd xs
 ---------------------------------------------------------------------------------
 
 ------------------------------------2.6 5----------------------------------------
--- mulLongInts :: Numeral -> Numeral -> Numeral
--- mulLongInts(r1, l1) (r2, l2)
---                            | r1 == r2 = (r1, applyCarries (applyMult (getLargerList l1 l2) (getSmallerList l2 l1) r1) r1)
---                            | r1 < r2 = mulLongInts (changeRadixLongInt (r1, l1) r2) (r2, l2)
---                            | otherwise = mulLongInts (changeRadixLongInt (r1, l1) r2) (r2, l2)
-
--- applyMult :: [Int] -> [Int] -> Int -> [Int]
--- applyMult xs ys r
---                 | length op > 1 =  map fromListToInt $ map (`cb` r) (sumLists op)
---                 | otherwise = map fromListToInt $ map (`cb` r) (head op)
---                 where op = (applyMultHelper (reverse $ map (`convertToTen` r) xs) (reverse $ map (`convertToTen` r) ys))
-
--- applyMultHelper :: [Int] -> [Int] -> [[Int]]
--- applyMultHelper _ [] = []
--- applyMultHelper xs (y:ys) = (applyMultHelper (0:xs) ys) ++ [reverse (map (y*) xs)]
-
--- sumLists :: [[Int]] -> [Int]
--- sumLists [[]] = []
--- sumLists (x:y:xs) = zipWith (+) (getLargerList x y) (padFront (abs (length x - length y)) (getSmallerList y x) 0)
-
-
-
-
 mulLongInts :: Numeral -> Numeral -> Numeral
 mulLongInts(r1, l1) (r2, l2)
                            | r1 == r2 = (r1, applyCarriesAdd (sumLists (applyMults l1 l2 r1)) r1)
                            | r1 < r2 = mulLongInts (changeRadixLongInt (r1, l1) r2) (r2, l2)
                            | otherwise = mulLongInts (r1, l1) (changeRadixLongInt (r2, l2) r1)
-
--- applyMult :: [Int] -> [Int] -> [Int]
--- applyMult xs ys
---                | length op > 1 = sumLists (padLists op (maximum (count op)))
---                | otherwise = head op
---                where op = (applyMultHelper (reverse xs) (reverse ys))
-
--- applyMultHelper :: [Int] -> [Int] -> [[Int]]
--- applyMultHelper _ [] = []
--- applyMultHelper xs (y:ys) = (applyMultHelper (0:xs) ys) ++ [reverse (map (y*) xs)]
 
 padLists :: [[Int]] -> Int -> [[Int]]
 padSize [[]] _ = [[]]
@@ -149,11 +112,6 @@ count :: [[a]] -> [Int]
 count [] = []
 count (x:xs) =  (length x):(count xs)
 
--- sumLists :: [[Int]] -> [Int]
--- sumLists [[x]] = [x]
--- sumLists [[]] = []
--- sumLists (x:y:xs) = (zipWith (+) (getLargerList x y) (padFront (abs (length x - length y)) (getSmallerList y x) 0))
-
 sumLists :: [[Int]] -> [Int]
 sumLists [[x]] = [x]
 sumLists [[]] = []
@@ -162,17 +120,6 @@ sumLists (x:xs) = foldl (zipWith (+)) x xs
 applyMults :: [Int] -> [Int] -> Int -> [[Int]]
 applyMults xs ys r = padLists op (maximum (count op))
                      where op = (map (reverse) (applyMultsHelper (reverse xs) (reverse ys)))
---this one sort of works
--- applyCarriesHelperMult :: [Int] -> Int -> [Int]
--- applyCarriesHelperMult [x] r =  (breakDownNum x r) ++ [(getCarry x r)]
--- applyCarriesHelperMult (x:y:xs) r = (breakDownNum x r) ++ applyCarriesHelperMult ((y + (getCarry x r)):xs) r
-
--- applyCarriesHelperMult :: [Int] -> Int -> [Int]
--- applyCarriesHelperMult [x] r =  (breakDownNum x r) ++ [(getCarry x r)]
--- applyCarriesHelperMult (x:y:xs) r
---                                 | x `div` r /= 0 = (breakDownNum x r) ++ applyCarriesHelperMult ((y + (getCarry x r):xs)) r
---                                 | otherwise = [(getCarry x r)] ++ applyCarriesHelperMult (y:xs) r
-
 
 applyMultsHelper :: [Int]-> [Int]-> [[Int]]
 applyMultsHelper [] _ = []
@@ -181,14 +128,6 @@ applyMultsHelper xs (y:ys) = applyMultsHelper (0:xs) ys ++ [(multOneNumToList y 
 
 multOneNumToList :: Int -> [Int] -> [Int]
 multOneNumToList x xs = map (x*) xs
-
-getCarry :: Int -> Int -> Int
-getCarry x r
-           | x `div` r == 0 = (x `mod` r)
-           | otherwise = getCarry (x `div` r) r
-
-func a [] = [a]
-func a (x:xs) = x : func a xs
 ---------------------------------------------------------------------------------
 
 
@@ -249,24 +188,39 @@ cb n r = cb (n `div` r) r ++ [(n `mod` r)]
 convertToTen :: Int -> Int -> Int
 convertToTen n r = sum $ map (\(x,y) ->  x* (r ^ y)) (zip (intToList n) (generateDecList $ ((length $ intToList n)) + (-1)))
 
+toBaseTen :: [Int] -> Int -> [Int] -> Numeral
+toBaseTen [] r i = (10, i)
+toBaseTen (x:xs) r i = toBaseTen xs r op
+                   where 
+                      m = mulLongInts (10, i) (10, [r])
+                      a = addLongInts m (10, [x])
+                      op = snd a
+
 cbFromTo :: [Int] -> Int -> Int -> Int
 cbFromTo [x] _ _ = x
 cbFromTo (x:xm:xs) or nr = cbFromTo (result : xs) or nr
                            where result = cbFromTo [x * or + xm] or nr
 
+fromBaseTenTo :: [Int] -> Int -> [Int] -> Numeral
+fromBaseTenTo [] r i = (r, i)
+fromBaseTenTo (x:xs) r i = fromBaseTenTo xs r op
+                           where m = mulLongInts (r, i) (r, mult)
+                                 a = addLongInts m (r, [x])
+                                 op = snd a
+                                 mult = intToListFrom r 10
+
 fromListToInt :: [Int] -> Int
 fromListToInt [] = 0
 fromListToInt (x:xs) = (x * (10 ^ length xs)) + fromListToInt xs
 
-breakDownNum :: Int -> Int -> [Int]
-breakDownNum 0 _ = []
-breakDownNum x r
-               | x `div` r /= 0 = [x `mod` r] ++ breakDownNum (x `div` r ) r
-               | otherwise = []
-
+--This is just the base 10 version
 intToList :: Int -> [Int]
 intToList 0 = []
 intToList x = intToList (x `div` 10) ++ [x `mod` 10]
+
+intToListFrom :: Int -> Int -> [Int]
+intToListFrom r 0 = []
+intToListFrom r x = intToListFrom r (x `div` r) ++ [x `mod` r]
 
 generateDecList :: Int -> [Int]
 generateDecList 0 = [0]
@@ -274,6 +228,11 @@ generateDecList x = [fromIntegral x] ++ generateDecList (fromIntegral x +(-1))
 
 padFront :: Int -> [Int] -> Int -> [Int]
 padFront len xs padding = (take len (repeat padding)) ++ xs
+
+removeZeroPadding :: Numeral -> Numeral
+removeZeroPadding (b, (x:xs))
+                            | x == 0 = removeZeroPadding (b, xs)
+                            | otherwise = (b, (x:xs))
 
 getLargerList :: [Int] -> [Int] -> [Int]
 getLargerList xs ys
@@ -284,3 +243,11 @@ getSmallerList :: [Int] -> [Int] -> [Int]
 getSmallerList xs ys
                     | length xs <= length ys = xs
                     | otherwise = ys
+
+getCarry :: Int -> Int -> Int
+getCarry x r
+           | x `div` r == 0 = (x `mod` r)
+           | otherwise = getCarry (x `div` r) r
+
+func a [] = [a]
+func a (x:xs) = x : func a xs
