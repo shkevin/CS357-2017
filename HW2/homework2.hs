@@ -100,7 +100,7 @@ applyCarriesHelperAdd (x:xs) r carry = [num `mod` r] ++ applyCarriesHelperAdd xs
 ------------------------------------2.6 5----------------------------------------
 mulLongInts :: Numeral -> Numeral -> Numeral
 mulLongInts(r1, l1) (r2, l2)
-                           | r1 == r2 = (r1, applyCarriesAdd (sumLists (applyMults l1 l2 r1)) r1)
+                           | r1 == r2 = (r1, convertList (applyCarriesAdd (sumLists (applyMults l1 l2 r1)) r1) r1)
                            | r1 < r2 = mulLongInts (changeRadixLongInt (r1, l1) r2) (r2, l2)
                            | otherwise = mulLongInts (r1, l1) (changeRadixLongInt (r2, l2) r1)
 
@@ -111,6 +111,26 @@ padLists xs padSize = map (\x -> (padFront (padSize - length x) x 0)) xs
 count :: [[a]] -> [Int]
 count [] = []
 count (x:xs) =  (length x):(count xs)
+
+-- map (reverse) (map (`breakDownNum` 5) [3412,4,0,0])
+
+convertList :: [Int] -> Int -> [Int]
+convertList xs r =  concat (replace [] [0] list)
+                    where list = map (reverse) (map (`breakDownNum` r) xs)
+                          count = length $ filter (==[]) list
+
+-- replace :: Eq b => [b] -> [b] -> [b] -> [b]
+replace a b = map (\x -> if (a == x) then b else x)
+
+combine :: [a] -> [a] -> [[a]]
+combine xs ys = [xs,ys]
+
+-- padFront (length (filter (==[]) xs)) (reverse $ concat list) 0
+-- where list = map (reverse) (map (`breakDownNum` r) xs
+
+breakDownNum :: Int -> Int -> [Int]
+breakDownNum 0 _ = []
+breakDownNum x r = [x `mod` r] ++ breakDownNum (x `div` r) r
 
 sumLists :: [[Int]] -> [Int]
 sumLists [[x]] = [x]
