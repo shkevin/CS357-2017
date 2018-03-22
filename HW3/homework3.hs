@@ -18,7 +18,7 @@ balance list = Node (balance xs) (balance ys)
 
 --Returns a given list split in half
 splitList :: [a] -> ([a], [a])
-splitList tree = splitAt ((length tree) `div` 2) tree
+splitList tree = splitAt (div (length tree) 2) tree
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.2--------------------------------------------------
@@ -36,8 +36,10 @@ sieve n = [[2..n] !! x | x <- elemIndices (True) (map (testPrime) [2..n])]
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.3--------------------------------------------------
+--takes an int n as its argument and returns a function which composes any unary function n times.
 church :: Int -> (c -> c) -> c -> c
-church x f = undefined
+church 0 = \x y -> y
+church n = \x y -> x $ church (n + (-1)) x y
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.4--------------------------------------------------
@@ -46,6 +48,56 @@ church x f = undefined
 
 --Returns the powerset of a given set S. Where the powerset is the set of all subsets of S.
 powerset :: [Int] -> [[Int]]
-powerset [] = []
-powerset (x:xs) = undefined
+powerset [] = [[]]
+powerset (x:xs) = map (x:) (powerset xs) ++ powerset xs
+---------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+----------------------------------------------3.5--------------------------------------------------
+makeCommand :: [[(Double,Double)]] -> String
+makeCommand = undefined
+---------------------------------------------------------------------------------------------------
+
+----------------------------------------------3.6--------------------------------------------------
+--Need to ensure that adding prime to this doesn't matter for grading
+data T = Leaf' | Node' T T
+data P = GoLeft P | GoRight P | This
+
+allpaths :: T -> [P]
+allpaths = undefined
+---------------------------------------------------------------------------------------------------
+
+----------------------------------------------3.7--------------------------------------------------
+type Expr = [[Int]]
+
+eval :: (Int -> Bool) -> Expr -> Bool
+eval = undefined
+
+satisfiable :: Expr -> Bool
+satisfiable = undefined
+---------------------------------------------------------------------------------------------------
+
+----------------------------------------------3.8--------------------------------------------------
+data Field = B | R | G deriving (Eq, Ord, Show)
+type Board = [Field]
+
+strategyForGreen :: Board -> Int
+strategyForGreen = undefined
+
+strategyForRed :: Board -> Int
+strategyForRed = undefined
 ---------------------------------------------------------------------------------------------------
