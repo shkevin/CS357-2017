@@ -69,6 +69,7 @@ allpaths = undefined
 ----------------------------------------------3.7--------------------------------------------------
 type Expr = [[Int]]
 
+-- [[-1, 2, 4], [-2, -3]] == (¬x1 ∨ x2 ∨ x4) ∧ (¬x2 ∨ ¬x3)
 eval :: (Int -> Bool) -> Expr -> Bool
 eval = undefined
 
@@ -80,9 +81,41 @@ satisfiable = undefined
 data Field = B | R | G deriving (Eq, Ord, Show)
 type Board = [Field]
 
+-- B = unoccupied
+-- R = field occupied by first player
+-- G = field occupied by second player
+-- Ex: BRG
+--     BRG
+--     BRB
+
 strategyForGreen :: Board -> Int
 strategyForGreen = undefined
 
 strategyForRed :: Board -> Int
 strategyForRed = undefined
+
+--Takes in a Board of fields and maximizing player or not.
+--Outputs the index of best move for player. bestVal will initially
+--be (-inf).
+minimax :: Board -> Bool -> Int
+minimax board maximizing
+                       | maximizing == True = undefined
+                       | otherwise = undefined
+                       where maxBest = infinity
+                             minBest = - infinity
+
+iterateBoard :: Board -> Field
+iterateBoard [] = []
+iterateBoard board = show 
+
+maxRealFloat :: RealFloat a => a -> a
+maxRealFloat x = encodeFloat b (e-1) `asTypeOf` x where
+  b     = floatRadix x - 1
+  (_,e) = floatRange x
+
+infinity :: RealFloat a => a
+infinity
+       | isInfinite inf = inf
+       | otherwise = maxRealFloat 1.0
+       where inf = 1/0
 ---------------------------------------------------------------------------------------------------
