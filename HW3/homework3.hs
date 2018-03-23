@@ -28,7 +28,7 @@ goldbach n = [(x,y) | x <- sieve n, y <- sieve n, x + y == n]
 
 --Test whether or not the given number is prime. This uses the Trial Division method.
 testPrime :: Int -> Bool
-testPrime n = length [x | x <- [y | y <- [1 .. ceiling (sqrt $ fromIntegral n)], n `mod` y == 0] ] <= 1
+testPrime n = null [x | x <- [2 .. ceiling (sqrt $ fromIntegral n)], n `mod` x == 0]
 
 --Technically not a true sieve, this is very inefficient. Starts at 2 to ignore 1 as prime.
 sieve :: Int -> [Int]
@@ -37,9 +37,12 @@ sieve n = [[2..n] !! x | x <- elemIndices (True) (map (testPrime) [2..n])]
 
 ----------------------------------------------3.3--------------------------------------------------
 --takes an int n as its argument and returns a function which composes any unary function n times.
+-- church :: Int -> (c -> c) -> c -> c
+-- church 0 = \x y -> y
+-- church n = \x y -> x $ church (n + (-1)) x y
+
 church :: Int -> (c -> c) -> c -> c
-church 0 = \x y -> y
-church n = \x y -> x $ church (n + (-1)) x y
+church n f = foldr (.) id (replicate n f)
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.4--------------------------------------------------
@@ -104,9 +107,9 @@ minimax board maximizing
                        where maxBest = infinity
                              minBest = - infinity
 
-iterateBoard :: Board -> Field
-iterateBoard [] = []
-iterateBoard board = show 
+-- iterateBoard :: Board -> Field
+-- iterateBoard [] = []
+-- iterateBoard board = show 
 
 maxRealFloat :: RealFloat a => a -> a
 maxRealFloat x = encodeFloat b (e-1) `asTypeOf` x where
