@@ -8,15 +8,15 @@ NetID: Shkevin
 import Data.List
 
 ----------------------------------------------3.1--------------------------------------------------
-data Tree a = Leaf a | Node (Tree a) (Tree a)
+data Tree a = LeafT a | NodeT (Tree a) (Tree a) deriving (Eq, Show)
 
 --Converts a non-empty list into a balance tree.
 balance :: [a] -> Tree a
-balance [x] = Leaf x
-balance list = Node (balance xs) (balance ys)
+balance [x] = LeafT x
+balance list = NodeT (balance xs) (balance ys)
                where (xs,ys) = splitList list
 
---Returns a given list split in half
+--Returns a given list split in halfmn
 splitList :: [a] -> ([a], [a])
 splitList tree = splitAt (div (length tree) 2) tree
 ---------------------------------------------------------------------------------------------------
@@ -49,21 +49,50 @@ church n f = foldr (.) id (replicate n f)
 --S invariants: Needs to have no duplicates, and monotonically increasing order.
 --P(S) invariants: Needs to have no duplicates, and order is immaterial.
 
---Returns the powerset of a given set S. Where the powerset is the set of all subsets of S.
+--Returns the powerset of a given set S. Where the powerset is the all subsets of S.
 powerset :: [Int] -> [[Int]]
-powerset [] = [[]]
-powerset (x:xs) = map (x:) (powerset xs) ++ powerset xs
+powerset (x:xs) = subsequences (x:xs)
+--map (x:) (powerset xs) ++ powerset xs
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.5--------------------------------------------------
+example :: [[(Double, Double)]]
+example = [[(100.0,100.0),(100.0,200.0),(200.0,100.0)],
+  [(150.0,150.0),(150.0,200.0),(200.0,200.0),(200.0,150.0)]]
+
+
+--The result returned by makeCommand is a Haskell value of type String, which
+--contains PostScript commands for drawing the given polgygon.
 makeCommand :: [[(Double,Double)]] -> String
-makeCommand = undefined
+makeCommand xs = header ++ printHeader xs ++ "\n\n" ++ makeCommandHelper xs
+
+printTuple :: (Show a, Show b) => (a,b) -> String
+printTuple (a,b) = ((show a) ++ " " ++ (show b))
+
+printListOfTuples :: [(Double, Double)] -> String
+printListOfTuples (x:xs) = concat (intersperse "" str) ++ "closepath\nstroke\n\n"
+                           where y:ys = map (printTuple) (x:xs)
+                                 str = (y ++ " moveto\n"):(map (++" lineto\n") ys)
+
+makeCommandHelper :: [[(Double,Double)]] -> String
+makeCommandHelper [] = footer
+makeCommandHelper (x:xs) = (printListOfTuples x) ++ makeCommandHelper xs
+
+printHeader :: [[(Double, Double)]] -> String
+printHeader (x:xs) = ((show . fst) min ++ " " ++ (show . snd) min) ++ " " ++ ((show . fst) max ++ " " ++ (show . snd) max)
+                    where min = (minimum (minimum (x:xs)))
+                          max = (maximum (maximum (x:xs)))
+
+--concat (intersperse "" (map (printTuple) (x:xs)))
+
+header = "%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: "
+footer = "showpage\n%%EOF\n"
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.6--------------------------------------------------
 --Need to ensure that adding prime to this doesn't matter for grading
-data T = Leaf' | Node' T T
-data P = GoLeft P | GoRight P | This
+data T = Leaf | Node T T deriving (Eq, Show)
+data P = GoLeft P | GoRight P | This deriving (Eq, Show)
 
 allpaths :: T -> [P]
 allpaths = undefined
