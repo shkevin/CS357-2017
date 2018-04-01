@@ -5,6 +5,21 @@ NetID: Shkevin
 
 #!/usr/bin/env stack
 
+module Homework3
+( Tree(..),
+  balance,
+  goldbach,
+  church,
+  powerset,
+  makeCommand,
+  T(..),
+  P(..),
+  allpaths,
+  Expr,
+  eval,
+  satisfiable
+) where
+
 import Data.List
 
 ----------------------------------------------3.1--------------------------------------------------
@@ -37,7 +52,7 @@ splitList tree = splitAt (div (length tree) 2) tree
   * RETURNS: List of tuples containing primes that add to given number.
 -}
 goldbach :: Int -> [(Int, Int)]
-goldbach n = [(x,y) | x <- sieve n, y <- sieve n, x + y == n]
+goldbach n = removeDuplTuples [(x,y) | x <- sieve n, y <- sieve n, x + y == n]
 
 {-
   * PARAMETERS: Int to be tested.
@@ -56,6 +71,23 @@ testPrime n = null [x | x <- [2 .. ceiling (sqrt $ fromIntegral n)], n `mod` x =
 -}
 sieve :: Int -> [Int]
 sieve n = [[2..n] !! x | x <- elemIndices (True) (map (testPrime) [2..n])]
+
+
+{-
+  * PARAMETERS: 
+  * FUNCTION: 
+  * RETURNS: 
+-}
+removeDuplTuples :: Eq a => [(a,a)] -> [(a,a)]
+removeDuplTuples = nubBy symEq
+
+{-
+  * PARAMETERS: 
+  * FUNCTION: 
+  * RETURNS: 
+-}
+symEq :: Eq a => (a,a) -> (a,a) -> Bool
+symEq (x,y) (u,v) = (x == u && y == v) || (x == v && y == u)
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.3--------------------------------------------------
@@ -80,7 +112,6 @@ church n f = foldr (.) id (replicate n f)
 -}
 powerset :: [Int] -> [[Int]]
 powerset (x:xs) = subsequences (x:xs)
---map (x:) (powerset xs) ++ powerset xs
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.5--------------------------------------------------
@@ -89,7 +120,7 @@ example = [[(100.0,100.0),(100.0,200.0),(200.0,100.0)],
   [(150.0,150.0),(150.0,200.0),(200.0,200.0),(200.0,150.0)]]
 
 header = "%!PS-Adobe-3.0 EPSF-3.0\n%%BoundingBox: "
-footer = "showpage\n%%EOF\n"
+footer = "showpage\n%%EOF"
 
 {-
   * PARAMETERS: Doubley nested list of points for the polygon.
@@ -136,12 +167,13 @@ data T = Leaf | Node T T deriving (Eq, Show)
 data P = GoLeft P | GoRight P | This deriving (Eq, Show)
 
 {-
-  * PARAMETERS: 
-  * FUNCTION: 
-  * RETURNS: 
+  * PARAMETERS: Tree to find paths.
+  * FUNCTION: Finds all paths from root to leaves in given Tree T.
+  * RETURNS: List of data P, such that the list are the directions to the each path.
 -}
 allpaths :: T -> [P]
-allpaths = undefined
+allpaths Leaf = [This]
+allpaths (Node l r) = [This] ++ map GoLeft (allpaths l) ++ map GoRight (allpaths r)
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.7--------------------------------------------------
@@ -149,20 +181,58 @@ type Expr = [[Int]]
 
 -- [[-1, 2, 4], [-2, -3]] == (¬x1 ∨ x2 ∨ x4) ∧ (¬x2 ∨ ¬x3)
 {-
-  * PARAMETERS: 
-  * FUNCTION: 
-  * RETURNS: 
+  * PARAMETERS: Function to test eval with, Given Expression.
+  * FUNCTION: Evaluates the given List of List of Ints as a CNF.
+  * RETURNS: Whether the expression evaluates to True or False.
 -}
-eval :: (Int -> Bool) -> Expr -> Bool
-eval = undefined
+eval :: (Int -> Bool) -> Expr -> Bool 
+eval f [] = True
+eval f (x:xs) = (any (True==) $ flipNegative f x) && (eval f xs)
 
 {-
-  * PARAMETERS: 
-  * FUNCTION: 
-  * RETURNS: 
+  * PARAMETERS: function to test, clause inside expression
+  * FUNCTION: Flips the given evaluated function if variable in clause is negative.
+  * RETURNS: List of Bools after evaluated.
+-}
+flipNegative :: (Int -> Bool) -> [Int] -> [Bool]
+flipNegative f [] = []
+flipNegative f (x:xs)
+                    | x < 0 = not (f $ abs x) : flipNegative f xs
+                    | otherwise = (f $ abs x) : flipNegative f xs
+
+{-
+  * PARAMETERS: Expression to test.
+  * FUNCTION: Checks whether the given expression can be satisfied.
+  * RETURNS: If satisfiable.
 -}
 satisfiable :: Expr -> Bool
-satisfiable = undefined
+satisfiable xs = any (True==) $ iterateTable (permuteTheTruth $ (maximum . maximum) xs) xs
+
+{-
+  * PARAMETERS: List of list of Bools (permuations), and given expression.
+  * FUNCTION: Iterates the permutations and evaluates the expression with each.
+  * RETURNS: List of Bools of whether the permuations evaluates to true or false.
+-}
+iterateTable :: [[Bool]] -> Expr -> [Bool]
+iterateTable [] _ = []
+iterateTable (x:xs) expr = eval (test x) expr : iterateTable xs expr
+
+{-
+  * PARAMETERS: List of True/False, and n (index).
+  * FUNCTION: Mock function to map the index to a True/False value.
+  * RETURNS: Index and Bool value. Ex : 1 -> True, 2 -> False.
+-}
+test :: [Bool] -> Int -> Bool
+test xs n = (!!) xs (n - 1)
+
+{-
+  * PARAMETERS: Int value for the size of the truth table. Will be 2^n.
+  * FUNCTION: Generates truth table of specified size.
+  * RETURNS: Returns the truth table as a List of List of Bools for the size specified.
+-}
+permuteTheTruth :: Int -> [[Bool]]
+permuteTheTruth = sequence . flip replicate b
+                  where b = [b | b <- [True, False]]
 ---------------------------------------------------------------------------------------------------
 
 ----------------------------------------------3.8--------------------------------------------------
