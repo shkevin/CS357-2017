@@ -206,7 +206,7 @@ flipNegative f (x:xs)
   * RETURNS: If satisfiable.
 -}
 satisfiable :: Expr -> Bool
-satisfiable xs = any (True==) $ iterateTable (permuteTheTruth $ (maximum . maximum) xs) xs
+satisfiable xs = any (True==) $ iterateTable (permuteTheTruth $ (maximum $ map abs $ concat xs)) xs
 
 {-
   * PARAMETERS: List of list of Bools (permuations), and given expression.
