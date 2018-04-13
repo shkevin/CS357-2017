@@ -81,7 +81,6 @@ isort xs = reverse $ (isortHelper xs)
   * FUNCTION:
   * RETURNS:
 -}
---can use readFile, getContents, words. 
 fileisort :: String -> String -> IO ()
 fileisort fn1 fn2 = writeFile fn2 . unlines . isort . lines =<< readFile fn1
 -----------------------------4.3 Game Trees (40pts)-----------------------------
@@ -97,6 +96,36 @@ size = 3
 
 depth :: Int
 depth = 9
+
+-- play :: [Board] -> Field -> IO ()
+-- play board field = do cls
+--                       goto(1,1)
+--                       putBoard board
+--                       play' board field
+
+-- play :: [Board] -> Field -> IO ()
+-- play board field = undefined
+
+-- play' :: [Board] -> Field -> [Board]
+-- play [] _ = empty
+-- play board field
+--                 | full board = board
+--                 | field == G = play (bestmove board G) (next G)
+--                 | field == R = play (bestmove board R) (next R)
+
+playPrint :: [Board] -> Field -> IO ()
+playPrint board field = do
+                        putBoard board
+                        play board field
+
+play :: [Board] -> Field -> IO ()
+play board field
+               | wins G board = putStrLn "Player G wins!\n"
+               | wins R board = putStrLn "Player G wins!\n"
+               | full board = putStrLn "Draw!\n"
+               | otherwise = (playPrint (bestmove board field)) (next field)
+
+--Got most of this code from the book and altered it
 
 {-
   * PARAMETERS:
@@ -128,11 +157,6 @@ next :: Field -> Field
 next G = R
 next R = G
 next B = B
-
-getWinner :: [Board] -> Field
-getWinner board = if wins G board
-                  then G
-                  else R
 
 empty :: [Board]
 empty = replicate size (replicate size B)
