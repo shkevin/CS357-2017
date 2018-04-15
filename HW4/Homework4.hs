@@ -1,4 +1,7 @@
-#!/usr/bin/env stack
+{-
+Name: Kevin Cox
+NetID: Shkevin
+-}
 
 module Homework4 where
 
@@ -7,9 +10,9 @@ import qualified Data.List as L
 
 -------------------------------4.1 Genome Lists (40pts)--------------------------
 {-
-  * PARAMETERS:
-  * FUNCTION:
-  * RETURNS:
+  * PARAMETERS: Bases to insert.
+  * FUNCTION: A base is inserted between two adjacent points in a genome.
+  * RETURNS: List of all genomes where the given bases have been inserted.
 -}
 insertions :: String -> [String]
 insertions [] = [['A']] ++ [['T']] ++ [['G']] ++ [['C']]
@@ -17,9 +20,9 @@ insertions (x:xs) = [['A'] ++ (x:xs)] ++ [['T'] ++ (x:xs)] ++
     [['G'] ++ (x:xs)] ++ [['C'] ++ (x:xs)] ++ (map (x:) (insertions xs))
 
 {-
-  * PARAMETERS:
-  * FUNCTION:
-  * RETURNS:
+  * PARAMETERS: Bases to delete.
+  * FUNCTION: A point is deleted from a genome.
+  * RETURNS: list of all genomes that exclude the given bases to delete. 
 -}
 deletions :: String -> [String]
 deletions "" = [""]
@@ -27,9 +30,9 @@ deletions (x:"") = [""]
 deletions (x:xs) = [xs] ++ (map (x:) (deletions xs))
 
 {-
-  * PARAMETERS:
-  * FUNCTION:
-  * RETURNS:
+  * PARAMETERS: Bases to substitute
+  * FUNCTION: A base at a point is replaced with another base.
+  * RETURNS: List of all genomes with the given substitution applied.
 -}
 substitutions :: String -> [String]
 substitutions "" = [""]
@@ -41,9 +44,9 @@ subs (x:xs) = [['A']++ xs]++[['T']++ xs] ++
     [['G']++ xs] ++ [['C']++ xs] ++ (map (x:) (subs xs))
 
 {-
-  * PARAMETERS:
-  * FUNCTION:
-  * RETURNS:
+  * PARAMETERS: Bases to transpose.
+  * FUNCTION: The bases at two adjacent points are exchanged.
+  * RETURNS: List of all genomes with the given tranpose applied.
 -}
 transpositions :: String -> [String]
 transpositions "" = [[]]
@@ -77,9 +80,9 @@ isort xs = reverse $ (isortHelper xs)
                 isortHelper (x:xs) = insert x (isortHelper xs)
 
 {-
-  * PARAMETERS:
-  * FUNCTION:
-  * RETURNS:
+  * PARAMETERS: Filename 1, Filename 2.
+  * FUNCTION: Sorts the given file and outputs to file 2.
+  * RETURNS: Sorted filename.
 -}
 fileisort :: String -> String -> IO ()
 fileisort fn1 fn2 = writeFile fn2 . unlines . isort . lines =<< readFile fn1
@@ -97,21 +100,33 @@ size = 3
 depth :: Int
 depth = 9
 
--- play :: [Board] -> Field -> IO ()
--- play board field = do cls
---                       goto(1,1)
---                       putBoard board
---                       play' board field
+--Got most of this code from the book and altered it
 
--- play :: [Board] -> Field -> IO ()
--- play board field = undefined
+{-
+  * PARAMETERS: Board for Red to play.
+  * FUNCTION: Assess the given board for best move for R. 
+  * RETURNS: Int value for the best move for R.
+-}
+strategyForRed :: Board -> Int
+strategyForRed board = genericStrat board R
 
--- play' :: [Board] -> Field -> [Board]
--- play [] _ = empty
--- play board field
---                 | full board = board
---                 | field == G = play (bestmove board G) (next G)
---                 | field == R = play (bestmove board R) (next R)
+{-
+  * PARAMETERS: Board for Green to play.
+  * FUNCTION: Assess the given board for best move for G. 
+  * RETURNS: Int value for the best move for G.
+-}
+strategyForGreen :: Board -> Int
+strategyForGreen board = genericStrat board G
+
+genericStrat :: Board -> Field -> Int
+genericStrat board field =  head $ L.elemIndices (True) listOfBools
+                            where listOfBools = help $ zip (concat $ bestmove (splitEvery 3 board) field) board
+
+help :: [(Field, Field)] -> [Bool]
+help [] = [False]
+help (x:xs)
+          | fst x == snd x = False : help xs
+          | otherwise = True : help xs
 
 playPrint :: [Board] -> Field -> IO ()
 playPrint board field = do
@@ -125,33 +140,23 @@ play board field
                | full board = putStrLn "Draw!\n"
                | otherwise = (playPrint (bestmove board field)) (next field)
 
---Got most of this code from the book and altered it
+playString :: [Board] -> Field -> String
+playString board field
+                      | wins G board = "Player G wins!\n"
+                      | wins R board = "Player R wins!\n"
+                      | full board = "Draw!\n"
+                      | otherwise = playString (bestmove board field) (next field)
 
-{-
-  * PARAMETERS:
-  * FUNCTION:
-  * RETURNS:
--}
-strategyForRed :: Board -> Int
-strategyForRed board = genericStrat board R
+playNineGames :: [Board] -> [String]
+playNineGames [] = ["Done"]
+playNineGames (x:xs) = (playString (splitEvery 3 x) G) : playNineGames xs
 
-{-
-  * PARAMETERS:
-  * FUNCTION:
-  * RETURNS:
--}
-strategyForGreen :: Board -> Int
-strategyForGreen board = genericStrat board G
-
-genericStrat :: Board -> Field -> Int
-genericStrat board field =  head $ L.elemIndices (True) listOfBools
-                            where listOfBools = help $ zip (concat $ bestmove (splitEvery 3 board) field) board
-
-help :: [(Field, Field)] -> [Bool]
-help [] = [False]
-help (x:xs)
-                    | fst x == snd x = False : help xs
-                    | otherwise = True : help xs
+generateBoards :: [Board]
+generateBoards = splitEvery 9 [boards | n <- [0..8], boards <- (replaceNth n R (concat empty))]
+                
+replaceNth n newVal (x:xs)
+                         | n == 0 = newVal:xs
+                         | otherwise = x:replaceNth (n-1) newVal xs
 
 next :: Field -> Field
 next G = R
