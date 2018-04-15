@@ -100,7 +100,15 @@ size = 3
 depth :: Int
 depth = 9
 
---Got most of this code from the book and altered it
+{-
+ The idea behind both strategies is using minimax, but maximizing the field when needed, and
+ minimizing the field when needed. This has been tested with random games, as well as game boards
+ designed to try and break it. It will always end in a draw. You can run some of the test code by
+ calling -playNineGames (generateBoards)-. This will play nine games where each index of the board is used
+ by red in different games.
+
+-}
+
 
 {-
   * PARAMETERS: Board for Red to play.
