@@ -248,7 +248,7 @@ minimax (Node board [])                                                     --G 
                       | otherwise = Node (board, B) []
 minimax (Node board ts)
                       | turn board == G = Node (board, minimum ps) ts'
-                      | turn board == R = Node (board, minimum ps) ts'
+                      | turn board == R = Node (board, maximum ps) ts'
                                           where
                                              ts' = map minimax ts
                                              ps = [p | Node (_,p) _ <- ts']
