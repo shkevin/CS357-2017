@@ -136,7 +136,7 @@ playPrint board field = do
 play :: [Board] -> Field -> IO ()
 play board field
                | wins G board = putStrLn "Player G wins!\n"
-               | wins R board = putStrLn "Player G wins!\n"
+               | wins R board = putStrLn "Player R wins!\n"
                | full board = putStrLn "Draw!\n"
                | otherwise = (playPrint (bestmove board field)) (next field)
 
@@ -248,7 +248,7 @@ minimax (Node board [])                                                     --G 
                       | otherwise = Node (board, B) []
 minimax (Node board ts)
                       | turn board == G = Node (board, minimum ps) ts'
-                      | turn board == R = Node (board, maximum ps) ts'
+                      | turn board == R = Node (board, minimum ps) ts'
                                           where
                                              ts' = map minimax ts
                                              ps = [p | Node (_,p) _ <- ts']
