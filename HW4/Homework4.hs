@@ -108,7 +108,8 @@ depth = 9
   * RETURNS: Int value for the best move for R.
 -}
 strategyForRed :: Board -> Int
-strategyForRed board = genericStrat board R
+strategyForRed board = head $ L.elemIndices (True) listOfBools
+                            where listOfBools = help $ zip (concat $ bestmove (splitEvery 3 board) R) board
 
 {-
   * PARAMETERS: Board for Green to play.
@@ -116,7 +117,9 @@ strategyForRed board = genericStrat board R
   * RETURNS: Int value for the best move for G.
 -}
 strategyForGreen :: Board -> Int
-strategyForGreen board = genericStrat board G
+strategyForGreen board = head $ L.elemIndices (True) listOfBools
+                            where listOfBools = help $ zip (concat $ bestmoveForGreen (splitEvery 3 board) G) board
+
 
 genericStrat :: Board -> Field -> Int
 genericStrat board field =  head $ L.elemIndices (True) listOfBools
@@ -253,11 +256,29 @@ minimax (Node board ts)
                                              ts' = map minimax ts
                                              ps = [p | Node (_,p) _ <- ts']
 
+minimaxForGreen :: Tree [Board] -> Tree ([Board], Field) 
+minimaxForGreen (Node board [])                                                     --G == 0, R = X
+                      | wins G board = Node (board, G) []
+                      | wins R board = Node (board, R) []
+                      | otherwise = Node (board, B) []
+minimaxForGreen (Node board ts)
+                      | turn board == G = Node (board, maximum ps) ts'
+                      | turn board == R = Node (board, minimum ps) ts'
+                                          where
+                                             ts' = map minimaxForGreen ts
+                                             ps = [p | Node (_,p) _ <- ts']                                             
+
 bestmove :: [Board] -> Field -> [Board]
 bestmove board field = head [g' | Node (g',field') _ <- ts, field' == best]
                        where
                           tree = prune depth (gametree board field)
                           Node (_,best) ts = minimax tree
+
+bestmoveForGreen :: [Board] -> Field -> [Board]
+bestmoveForGreen board field = head [g' | Node (g',field') _ <- ts, field' == best]
+                       where
+                          tree = prune depth (gametree board field)
+                          Node (_,best) ts = minimaxForGreen tree
 
 ------------4.4 (Optional) Drawing Game Trees and Strategies (30pts EC)---------
 {-
