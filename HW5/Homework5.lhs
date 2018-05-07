@@ -55,7 +55,7 @@ bfnum' :: Int -> [Tree a] -> [Tree Int]
 bfnum' depth [] = []
 bfnum' depth level = rebuildTree depth level nextLevel'
                      where 
-                        nextLevel = concat (map getChildren level)
+                        nextLevel = concatMap getChildren level
                         numNodes = depth + (length nextLevel `div` 2)
                         nextLevel' = bfnum' numNodes nextLevel
 
@@ -107,13 +107,13 @@ bfs tree = bf [tree]
 type Identifier = String
 
 data Expr = Num Integer
-          | Var Identifier
-          | Let {var :: Identifier, value :: Expr, body :: Expr}
-          | Add Expr Expr
-          | Sub Expr Expr
-          | Mul Expr Expr
-          | Div Expr Expr
-          deriving (Eq)
+  | Var Identifier
+  | Let {var :: Identifier, value :: Expr, body :: Expr}
+  | Add Expr Expr
+  | Sub Expr Expr
+  | Mul Expr Expr
+  | Div Expr Expr
+  deriving (Eq)
 
 type Env = Identifier -> Integer
 
@@ -139,8 +139,25 @@ extendEnv oldEnv s n s' = if s' == s then n else oldEnv s'
   * RETURNS: 
 -}
 evalInEnv :: Env -> Expr -> Integer
-evalInEnv = undefined
+evalInEnv env (Num i) = i 
+evalInEnv env (Var x) = env x
+evalInEnv env (Let {var = x,value=i,body=b}) = evalInEnv (extendEnv env x (evalInEnv env i)) b
+evalInEnv env (Mul a b) = mulOp env (Mul a b)
+evalInEnv env (Div a b) = divOp env (Div a b)
+evalInEnv env (Add a b) = addOp env (Add a b)
+evalInEnv env (Sub a b) = subOp env (Sub a b)
 
+addOp :: Env -> Expr -> Integer
+addOp env (Add a b) = (evalInEnv env a) + (evalInEnv env b)
+
+mulOp :: Env -> Expr -> Integer
+mulOp env (Mul a b) = (evalInEnv env a) * (evalInEnv env b)
+
+subOp :: Env -> Expr -> Integer 
+subOp env (Sub a b) = (evalInEnv env a) - (evalInEnv env b)
+
+divOp :: Env -> Expr -> Integer 
+divOp env (Div a b) = (evalInEnv env a) `div` (evalInEnv env b)
 -------------------------5.3 Infinite Lists (30 pts)--------------------------
 {-
   * PARAMETERS: 
@@ -152,3 +169,11 @@ diag = undefined
 
 
 \end{code}
+
+% -- evalInEnv env (Num i) = i
+% -- evalInEnv env (Var x) = env x
+% -- evalInEnv env (Let {var=x,value=i,body=b}) = evalInEnv (extendEnv env x (evalInEnv env i)) b
+% -- evalInEnv env (Mul a b) = (evalInEnv env a) * (evalInEnv env b)
+% -- evalInEnv env (Div a b) = (evalInEnv env a) `div` (evalInEnv env b)
+% -- evalInEnv env (Add a b) = (evalInEnv env a) + (evalInEnv env b)
+% -- evalInEnv env (Sub a b) = (evalInEnv env a) - (evalInEnv env b)
