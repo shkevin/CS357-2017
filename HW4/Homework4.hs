@@ -7,6 +7,8 @@ module Homework4 where
 
 --No other imports allowed
 import qualified Data.List as L
+import System.Random
+import System.IO.Unsafe
 
 -------------------------------4.1 Genome Lists (40pts)--------------------------
 {-
@@ -35,13 +37,23 @@ deletions (x:xs) = [xs] ++ (map (x:) (deletions xs))
   * RETURNS: List of all genomes with the given substitution applied.
 -}
 substitutions :: String -> [String]
-substitutions "" = [""]
-substitutions (x:xs) = take ((length $ subs (x:xs)) - 1) (subs (x:xs))
+substitutions xs = aS ++ gS ++ cS ++ tS
+                where
+                   aS = applyToAll xs 'A' 0
+                   gS = applyToAll xs 'G' 0
+                   cS = applyToAll xs 'C' 0
+                   tS = applyToAll xs 'T' 0
 
-subs :: String -> [String]
-subs "" = [""]
-subs (x:xs) = [['A']++ xs]++[['T']++ xs] ++
-    [['G']++ xs] ++ [['C']++ xs] ++ (map (x:) (subs xs))
+charAtIndex :: String -> Char -> Int -> String
+charAtIndex xs char i = front ++ [char] ++ back
+                        where
+                           front = take i xs
+                           back = drop (i+1) xs
+
+applyToAll :: String -> Char -> Int -> [String]
+applyToAll xs char n
+                 | (length xs) == n = []
+                 | otherwise = charAtIndex xs char n : applyToAll xs char (n+1)
 
 {-
   * PARAMETERS: Bases to transpose.
@@ -100,13 +112,16 @@ size = 3
 depth :: Int
 depth = 9
 
+seed :: Int
+seed = unsafePerformIO (getStdRandom (randomR (0, maxBound::Int)))
+
 {-
  The idea behind both strategies is using minimax, but maximizing the field when needed, and
  minimizing the field when needed. This has been tested with random games, as well as game boards
- designed to try and break it. It will always end in a draw. You can run some of the test code by
- calling -playNineGames (generateBoards)-. This will play nine games where each index of the board is used
- by red in different games.
-
+ designed to try and break it. It will always end in a draw or with red winning. You can run some of the test code by
+ calling -playRandom n-. This will play n games where G is played Randomly. This proves that the algorithm is perfect 
+ for both players since both of them are using the same algorithm. You can show that they always draw by calling
+ -play empty R-. This plays R against G, where the algorithms are the same. This always results in a draw.
 -}
 
 
@@ -149,30 +164,56 @@ play board field
                | wins G board = putStrLn "Player G wins!\n"
                | wins R board = putStrLn "Player R wins!\n"
                | full board = putStrLn "Draw!\n"
-               | otherwise = (playPrint (bestmove board field)) (next field)
+               | otherwise = (playPrint (bestmove board field)) (nextField field)
 
 playString :: [Board] -> Field -> String
 playString board field
                       | wins G board = "Player G wins!\n"
                       | wins R board = "Player R wins!\n"
                       | full board = "Draw!\n"
-                      | otherwise = playString (bestmove board field) (next field)
+                      | otherwise = playString (bestmove board field) (nextField field)
 
 playNineGames :: [Board] -> [String]
 playNineGames [] = ["Done"]
 playNineGames (x:xs) = (playString (splitEvery 3 x) G) : playNineGames xs
 
+-- playRandom :: [Board] -> Field -> [String]
+-- playRandom board field = 
+
 generateBoards :: [Board]
 generateBoards = splitEvery 9 [boards | n <- [0..8], boards <- (replaceNth n R (concat empty))]
+
+generateRandomNumbers :: Int -> [Int]
+generateRandomNumbers n = take n . randomRs (0, 8) . mkStdGen $ seed
+
+firstValidMove :: [Board] -> Int
+firstValidMove board = if length x /= 0
+                       then head $ x
+                       else -1
+                       where x = [x | x <- generateRandomNumbers 9, valid board x]
+
+playRandom :: Int -> [String]
+playRandom 0 = ["Done"]
+playRandom n = playOneRandom empty R : playRandom (n-1)
+
+playOneRandom :: [Board] -> Field -> String
+playOneRandom board field 
+                        | wins G board = "Player G wins!\n"
+                        | wins R board = "Player R wins!\n" 
+                        | full board = "Draw!\n"
+                        | validMove == -1 = "Error"
+                        | field == R = playOneRandom (bestmove board field) (nextField field)
+                        | field == G = playOneRandom (splitEvery 3 (replaceNth (validMove) field (concat board))) (nextField field)
+                        where validMove = firstValidMove board
                 
 replaceNth n newVal (x:xs)
                          | n == 0 = newVal:xs
                          | otherwise = x:replaceNth (n-1) newVal xs
 
-next :: Field -> Field
-next G = R
-next R = G
-next B = B
+nextField :: Field -> Field
+nextField G = R
+nextField R = G
+nextField B = B
 
 empty :: [Board]
 empty = replicate size (replicate size B)
@@ -240,7 +281,7 @@ chop n [] = []
 chop n xs = take n xs : chop n (drop n xs)
 
 gametree :: [Board] -> Field -> Tree [Board]
-gametree board field = Node board [gametree g' (next field) | g' <- moves board field]
+gametree board field = Node board [gametree g' (nextField field) | g' <- moves board field]
 
 moves :: [Board] -> Field -> [[Board]]
 moves board field
